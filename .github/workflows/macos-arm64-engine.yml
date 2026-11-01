@@ -196,7 +196,8 @@ jobs:
 
       - name: Verify the archive
         # unpack to a path with a space (the engine was packaged elsewhere),
-        # check it again and start two programs there
+        # check it again, and run the first-time setup of INTEGRATION.md
+        # there (offline: without the update check) and two programs
         run: |
           dist=$RUNNER_TEMP/dist
           moved="$RUNNER_TEMP/Test Dir"
@@ -204,17 +205,27 @@ jobs:
           tar -xf "$dist/$ENGINE_ARCHIVE" -C "$moved"
           cmp "$moved/miktex/engine-manifest.json" "$dist/engine-manifest.json"
           bash macos-port/engine/verify-engine.sh "$moved/miktex" "$MACOS_MIN_VERSION"
+          engine=$moved/miktex
           data="$RUNNER_TEMP/smoke data"
           mkdir -p "$RUNNER_TEMP/smoke home" "$data/texmfs/config/miktex/config"
           : > "$data/texmfs/config/miktex/config/miktexstartup.ini"
-          for cmd in miktex pdflatex; do
-            env -i HOME="$RUNNER_TEMP/smoke home" PATH="$moved/miktex/bin:/usr/bin:/bin" \
+          run()
+          {
+            env -i HOME="$RUNNER_TEMP/smoke home" PATH="$engine/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
               MIKTEX_USERCONFIG="$data/texmfs/config" \
               MIKTEX_USERDATA="$data/texmfs/data" \
               MIKTEX_USERINSTALL="$data/texmfs/install" \
               MIKTEX_USERSTARTUPFILE="$data/texmfs/config/miktex/config/miktexstartup.ini" \
-              "$moved/miktex/bin/$cmd" --version
-          done
+              "$@"
+          }
+          run "$engine/bin/initexmf" --disable-installer --set-config-value="[MPM]AutoInstall=1"
+          run "$engine/bin/miktex" --disable-installer fndb refresh
+          run "$engine/bin/miktex" --disable-installer fontmaps configure
+          run "$engine/bin/miktex" --disable-installer languages configure
+          run "$engine/bin/miktex" --disable-installer fndb refresh
+          run "$engine/bin/miktex" --version
+          run "$engine/bin/pdflatex" --version
+          run "$engine/bin/kpsewhich" pdftex.map
 
       # always: the logs of the sandbox tools, the inputs of the license
       # collection and the manifest (closure, links, minos)

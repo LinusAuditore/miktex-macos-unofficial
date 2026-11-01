@@ -4,7 +4,8 @@
 #
 # usage: make-manifest.py --engine DIR --closure TSV --links TSV --minos TSV
 #          --miktex-version V --max-min-version V --fork-commit C
-#          --upstream-commit C [--tag T] [--build KEY=VALUE ...] --output FILE
+#          --upstream-commit C [--tag T] [--licenses-index FILE]
+#          [--build KEY=VALUE ...] --output FILE
 #
 # TSV inputs: --closure from package-engine.sh, --links from make-links.sh,
 # --minos from verify-engine.sh. The manifest records what is in the
@@ -55,6 +56,7 @@ def main():
     p.add_argument("--tag")
     p.add_argument("--fork-commit", required=True)
     p.add_argument("--upstream-commit", required=True)
+    p.add_argument("--licenses-index", help="licenses/INDEX.tsv of the package")
     p.add_argument("--build", action="append", default=[], metavar="KEY=VALUE")
     p.add_argument("--output", required=True)
     args = p.parse_args()
@@ -104,6 +106,16 @@ def main():
         sys.exit(f"make-manifest.py: {args.links} lists links that are not in bin/")
     helpers = sorted(os.listdir(os.path.join(engine, "libexec/miktex")))
 
+    licenses = None
+    if args.licenses_index:
+        with open(args.licenses_index, encoding="utf-8") as f:
+            index_lines = sum(1 for _ in f) - 1
+        licenses = {
+            "index": os.path.relpath(os.path.realpath(args.licenses_index), engine),
+            "index_sha256": sha256(args.licenses_index),
+            "texts": index_lines,
+        }
+
     build = {}
     for kv in args.build:
         key, sep, value = kv.partition("=")
@@ -138,6 +150,7 @@ def main():
         "helpers": helpers,
         "homebrew": [kegs[k] for k in sorted(kegs)],
         "bootstrapping": bootstrapping,
+        "licenses": licenses,
         "build": build,
     }
     with open(args.output, "w", encoding="utf-8") as f:

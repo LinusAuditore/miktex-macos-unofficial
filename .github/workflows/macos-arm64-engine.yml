@@ -61,6 +61,8 @@ jobs:
         # - SDKROOT keeps /usr/local/include out of the header search path;
         #   -I puts the openssl@3 headers before /opt/homebrew/include,
         #   whose openssl is openssl@4
+        # - the compilation database tells the license collection what was
+        #   compiled
         run: |
           BREW="$(brew --prefix)"
           cmake -S . -B build -G Ninja \
@@ -83,7 +85,8 @@ jobs:
             -DUSE_SYSTEM_HARFBUZZ_ICU=FALSE \
             -DUSE_SYSTEM_MSPACK=FALSE \
             -DWITH_MAN_PAGES=FALSE \
-            -DMIKTEX_USER_LINK_TARGET_DIR=/var/empty/miktex-links
+            -DMIKTEX_USER_LINK_TARGET_DIR=/var/empty/miktex-links \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
       - name: Name the release
         # an engine release tag must match the MiKTeX version of the
@@ -150,6 +153,21 @@ jobs:
           bash macos-port/engine/package-engine.sh "$RUNNER_TEMP/staging" "$out/miktex" "$out/closure.tsv"
           bash macos-port/engine/make-links.sh "$out/miktex" "$out/links.tsv"
           cp macos-port/engine/INTEGRATION.md "$out/miktex/"
+          # the license texts; checks the controlled table against the build
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            source_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/refs/tags/$GITHUB_REF_NAME.tar.gz
+          else
+            source_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz
+          fi
+          python3 -I macos-port/engine/collect-licenses.py \
+            --table macos-port/engine/licenses/components.json \
+            --repo . \
+            --build build \
+            --engine "$out/miktex" \
+            --closure "$out/closure.tsv" \
+            --source-url "$source_url" \
+            --release-sources "$out/release-sources.tsv" \
+            --release-dir "$RUNNER_TEMP/dist/sources"
           bash macos-port/engine/verify-engine.sh "$out/miktex" "$MACOS_MIN_VERSION" "$out/minos.tsv"
           git fetch --no-tags --quiet https://github.com/MiKTeX/miktex.git next
           # its own assignment: a failure must stop the step
@@ -164,6 +182,7 @@ jobs:
             --tag "$([ "$GITHUB_REF_TYPE" = tag ] && echo "$GITHUB_REF_NAME")" \
             --fork-commit "$GITHUB_SHA" \
             --upstream-commit "$upstream" \
+            --licenses-index "$out/miktex/licenses/INDEX.tsv" \
             --build "runner_image=${ImageOS:-}-${ImageVersion:-}" \
             --build "macos=$(sw_vers -productVersion)" \
             --build "xcode=$(xcodebuild -version | head -1)" \
@@ -171,6 +190,20 @@ jobs:
             --build "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             --build "run=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             --output "$out/miktex/engine-manifest.json"
+
+      - name: Download the sources
+        # the corresponding sources of the copyleft components that are not
+        # built from the fork's sources: Homebrew kegs and upstream programs
+        env:
+          CURL_HOME: ${{ runner.temp }}/curl
+        run: |
+          sources=$RUNNER_TEMP/dist/sources
+          mkdir -p "$sources"
+          while IFS=$'\t' read -r asset url sha; do
+            curl -fsSL -o "$sources/$asset" "$url"
+            echo "$sha  $sources/$asset" | shasum -a 256 -c -
+          done < "$RUNNER_TEMP/out/release-sources.tsv"
+          ls -l "$sources"
 
       - name: Archive
         # no extended attributes, AppleDouble files, ACLs or file flags in
@@ -190,7 +223,7 @@ jobs:
           fi
           cp "$out/miktex/engine-manifest.json" "$dist/"
           cd "$dist"
-          shasum -a 256 "$ENGINE_ARCHIVE" engine-manifest.json > SHA256SUMS
+          shasum -a 256 "$ENGINE_ARCHIVE" engine-manifest.json sources/* > SHA256SUMS
           cat SHA256SUMS
           ls -l
 
@@ -237,6 +270,7 @@ jobs:
           path: |
             build/sandbox/miktex/log/
             ${{ runner.temp }}/out/*.tsv
+            build/compile_commands.json
           if-no-files-found: ignore
           retention-days: 14
 
@@ -282,7 +316,8 @@ jobs:
             echo "- arm64 only, macOS $(python3 -c 'import json; print(json.load(open("engine-manifest.json"))["macos"]["min_version"])') or later; no Qt, no user interface"
             echo "- relocatable; ad-hoc signed; see INTEGRATION.md in the archive:"
             echo "  $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/$GITHUB_SHA/macos-port/engine/INTEGRATION.md"
-            echo "- engine-manifest.json describes the contents"
+            echo "- engine-manifest.json describes the contents; licenses/ in the archive has the license texts"
+            echo "- source-*: the corresponding sources of the copyleft components that are not built from this repository's sources (Homebrew libraries with their formula files, upstream programs); the others are in this tag's source archive"
             echo
             echo "## SHA-256"
             echo
@@ -292,7 +327,7 @@ jobs:
             echo
             echo "Built from commit $GITHUB_SHA."
           } > notes.md
-          gh release create "$GITHUB_REF_NAME" miktex-engine-*.tar.xz engine-manifest.json SHA256SUMS \
+          gh release create "$GITHUB_REF_NAME" miktex-engine-*.tar.xz engine-manifest.json SHA256SUMS sources/* \
             --repo "$GITHUB_REPOSITORY" \
             --draft \
             --prerelease \

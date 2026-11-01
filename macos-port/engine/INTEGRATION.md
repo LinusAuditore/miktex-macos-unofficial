@@ -135,7 +135,12 @@ mkdir -p "$D/texmfs/config/miktex/config"
 - The first `initexmf` installs the bootstrapping packages into
   `$MIKTEX_USERINSTALL`.
 - `[MPM]AutoInstall=1`: missing packages are installed automatically while
-  typesetting (the engine has no user interface to ask).
+  typesetting (the engine has no user interface to ask). `kpsewhich` does
+  the same: looking up a file of a package that is not installed installs
+  it.
+- `packages check-update` exits with 0 when there are no updates and with
+  **100 when updates are available** (it then lists them); neither is an
+  error.
 - `packages check-update` records the first update check. Until then, TeX
   programs print "So far, you have not checked for MiKTeX updates." when
   they exit. If the setup runs offline, run it later; if a TeX program ran
@@ -156,9 +161,14 @@ in `<engine>/bin` work; format files are made on first use.
 ## Updates
 
 - `miktex packages update` (and `packages check-update`) can be run by the
-  host. At its end it tries to update the links in the link directory; with
-  the engine's link directory this step fails with one warning, and the
-  other steps (font maps, languages, formats) run as usual.
+  host. When it installs or removes packages, it finishes by refreshing the
+  file name database, trying to update the links in the link directory,
+  and configuring font maps and languages. With the engine's link directory
+  the links step fails in a child process ("Operation not permitted:
+  /var/empty/miktex-links", recorded in the log only); the update itself
+  succeeds (exit code 0) and the other steps run.
+- An update deletes the format files; they are made again on their next
+  use, so the first typesetting run after an update takes longer.
 - The commands in `bin/` are fixed when the package is made. A command that
   a later package update adds (a new script or format) has no link in
   `bin/` until a new engine package is released.
@@ -174,6 +184,9 @@ in `<engine>/bin` work; format files are made on first use.
   engine program needs go onto that program when it is signed.
 - Under hardened runtime, library validation rejects libraries without the
   same Team ID: sign the libraries in `lib/` with the same identity.
+  Otherwise dyld stops the program ("Library not loaded: @rpath/...
+  mapping process and mapped file (non-platform) have different Team
+  IDs"). This also happens with an ad-hoc signature with `-o runtime`.
 - Known exceptions under hardened runtime:
   - `bin/miktex-dvisvgm` loads the Ghostscript library (`libgs`) the user
     installed, at run time, for PostScript and PDF input; library
@@ -183,7 +196,9 @@ in `<engine>/bin` work; format files are made on first use.
     link to them: `lualatex`, `texlua`, ...): Lua C modules (binary modules
     loaded with `require`) need `dlopen` of code with another Team ID
     (`disable-library-validation`); luaffi (`ffi`) needs executable memory
-    (`com.apple.security.cs.allow-unsigned-executable-memory`);
+    (`com.apple.security.cs.allow-unsigned-executable-memory`): without
+    it, the process is killed (SIGKILL) when a document or script uses
+    `ffi`;
   - `lib/libcrypto.3.dylib` and `lib/libcrypto.4.dylib` read
     `openssl.cnf` from `/opt/homebrew/etc/openssl@3` and
     `/opt/homebrew/etc/openssl@4` if Homebrew is installed.
@@ -193,8 +208,12 @@ in `<engine>/bin` work; format files are made on first use.
 - **App Sandbox is not supported.** Child processes inherit the sandbox;
   installing packages on demand, running scripts (Perl, Python, biber), and
   writing into `<D>` have not been evaluated under it.
-- If end users download the archive with a browser, remove the quarantine
-  attribute after unpacking: `xattr -dr com.apple.quarantine miktex`.
+- Quarantine: if the archive is downloaded with a browser, unpacking it
+  (also with `/usr/bin/tar`) gives every file the quarantine attribute.
+  Gatekeeper then blocks each program ("Apple could not verify ...") and
+  kills it. Remove the attribute after unpacking:
+  `xattr -dr com.apple.quarantine miktex`. An engine embedded in a signed
+  and notarized application at build time is not affected.
 
 ## Licenses
 

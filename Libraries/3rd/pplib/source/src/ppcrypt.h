@@ -6,6 +6,9 @@
 #include "utilcrypt.h"
 #include "utilcryptdef.h"
 
+/* the largest file key (bytes) the key buffers below and the rc4 key buffers in ppcrypt.c can hold */
+#define PPCRYPT_MAX_KEY 32
+
 typedef struct {
   ppuint algorithm_variant;  /* /V entry of encrypt dict */
   ppuint algorithm_revision; /* /R entry of encrypt dict */

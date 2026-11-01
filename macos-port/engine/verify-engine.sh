@@ -45,6 +45,17 @@ fail()
   bad=1
 }
 
+# whether a path exists and its real path is inside the package
+inside()
+{
+  local real
+  real=$(realpath "$1" 2>/dev/null) || return 1
+  case "$real" in
+    "$engine" | "$engine"/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 for d in bin lib libexec/miktex texmfs/install/miktex/bootstrapping; do
   if [ ! -d "$engine/$d" ]; then
     fail "missing directory: $d"
@@ -93,11 +104,13 @@ while IFS= read -r -d '' f; do
   count=$((count + 1))
   rel=${f#"$engine"/}
   dir=$(dirname "$f")
-  archs=$(lipo -archs "$f")
+  # commands that fail on a bad file must not stop the script (set -e):
+  # every problem is reported through fail
+  archs=$(lipo -archs "$f" 2>&1) || true
   if [ "$archs" != arm64 ]; then
     fail "not arm64-only ($archs): $rel"
   fi
-  id=$(otool -D "$f" | tail -n +2)
+  id=$(otool -D "$f" | tail -n +2) || true
   case "$rel" in
     lib/*)
       # a MiKTeX library is named after its SONAME link
@@ -107,11 +120,23 @@ while IFS= read -r -d '' f; do
       fi
       ;;
   esac
-  rpaths=$(otool -l "$f" | awk '$1 == "cmd" && $2 == "LC_RPATH" { getline; getline; print $2 }')
+  # a program has no loader above it: its own rpaths must find its
+  # libraries; a library may also rely on the rpaths of the program that
+  # loads it, which all lead to lib/
+  if otool -h "$f" | awk 'NR == 4 { exit !($5 == 2) }'; then
+    executable=1
+  else
+    executable=
+  fi
+  rpaths=$(otool -l "$f" | awk '$1 == "cmd" && $2 == "LC_RPATH" { getline; getline; print $2 }') || true
   while IFS= read -r rp; do
     case "$rp" in
       '') ;;
-      @loader_path*) ;;
+      @loader_path*)
+        if ! inside "$dir${rp#@loader_path}"; then
+          fail "rpath $rp leads outside the package or nowhere: $rel"
+        fi
+        ;;
       *) fail "rpath $rp: $rel" ;;
     esac
   done <<< "$rpaths"
@@ -126,19 +151,17 @@ while IFS= read -r -d '' f; do
             @loader_path*) rp=$dir${rp#@loader_path} ;;
             *) continue ;;
           esac
-          if [ -e "$rp/${dep#@rpath/}" ]; then
+          if [ -e "$rp/${dep#@rpath/}" ] && inside "$rp/${dep#@rpath/}"; then
             found=1
             break
           fi
         done <<< "$rpaths"
-        # a library may rely on the rpaths of the program that loads it;
-        # all of them lead to lib/
-        if [ -z "$found" ] && [ ! -e "$engine/lib/${dep#@rpath/}" ]; then
+        if [ -z "$found" ] && { [ -n "$executable" ] || [ ! -e "$engine/lib/${dep#@rpath/}" ]; }; then
           fail "unresolved $dep: $rel"
         fi
         ;;
       @loader_path/*)
-        if [ ! -e "$dir/${dep#@loader_path/}" ]; then
+        if ! inside "$dir/${dep#@loader_path/}"; then
           fail "unresolved $dep: $rel"
         fi
         ;;
@@ -151,7 +174,7 @@ while IFS= read -r -d '' f; do
     fail "invalid signature: $rel"
     cat "$work/codesign.err"
   fi
-  info=$(codesign -dv "$f" 2>&1)
+  info=$(codesign -dv "$f" 2>&1) || true
   flags=$(sed -n 's/^CodeDirectory .* flags=0x[0-9a-f]*(\([^)]*\)).*/\1/p' <<< "$info")
   if [ "$flags" != adhoc ]; then
     fail "signature flags '$flags', expected adhoc: $rel"
@@ -159,7 +182,7 @@ while IFS= read -r -d '' f; do
   if ! grep -q '^TeamIdentifier=not set' <<< "$info"; then
     fail "Team ID: $rel"
   fi
-  minos=$(vtool -arch arm64 -show-build "$f" 2>/dev/null | awk '$1 == "minos" { print $2; exit }')
+  minos=$(vtool -arch arm64 -show-build "$f" 2>/dev/null | awk '$1 == "minos" { print $2; exit }') || minos=
   if [ -z "$minos" ]; then
     fail "no minimum macOS version (minos): $rel"
   else

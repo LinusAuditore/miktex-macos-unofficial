@@ -218,6 +218,16 @@ in `<engine>/bin` work; format files are made on first use.
 ## Licenses
 
 MiKTeX is free software (GPL-2.0-or-later and others, see `COPYING.md` in
-the fork). The package contains third-party components; their license
-texts are in `licenses/` (see `licenses/README.txt`), and the sources of
-the GPL/LGPL Homebrew libraries are release assets of the engine release.
+the fork). The package contains third-party components; `licenses/` has
+their license texts: `licenses/README.txt` explains the layout, lists every
+component with its SPDX expression and has the acknowledgements some
+licenses require in the documentation of a product that includes them; a
+host that ships the engine should ship `licenses/` with it.
+
+`licenses/sources.tsv` says where the corresponding source of each
+component under a copyleft license is: the fork's source archive of the
+build (attached to every release by GitHub), or a `source-*` asset of the
+engine release (the sources and formula files of the Homebrew libraries,
+and upstream sources: the xml2pmx Oberon program and the URW base35 fonts
+compiled into dvisvgm). The CI build fails if the license table
+(`macos-port/engine/licenses/components.json`) and the build disagree.

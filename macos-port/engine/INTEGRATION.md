@@ -81,6 +81,19 @@ miktex/
 Do not pass any other `MIKTEX_*` variable, `TEXINPUTS` and the other
 `*INPUTS` variables, `TEXMF*`, or `FONTCONFIG_*`.
 
+External programs are found only through `PATH`:
+
+- Ghostscript (`gs`), needed for EPS graphics (epstopdf), `ps2pdf` and
+  PostScript input of dvisvgm, is not part of macOS or the engine. To use
+  a Ghostscript the user installed (e.g. `/opt/homebrew/bin`), append its
+  directory **after** `<engine>/bin` and the system directories, never
+  before them.
+- Script interpreters come from the system: Perl (`/usr/bin/perl`) is part
+  of macOS; `/usr/bin/python3` and `/usr/bin/java` are stubs that open an
+  installation dialog unless the Command Line Tools or a JDK are
+  installed. Commands that run Python or Java scripts (e.g. `arara`,
+  `bib2gls`) depend on that.
+
 With this environment, MiKTeX keeps all its state in `<D>`: packages,
 format files, the file name database, the font caches, logs, and settings.
 The engine directory is never written to, so it can be read-only (for
@@ -89,7 +102,14 @@ example inside a signed application bundle).
 Remaining contact points with the user's home directory:
 
 - `~/.miktex/texmfs/config/miktex/config/miktex.ini` is read if it exists
-  (a MiKTeX installed by the user in `~/.miktex`);
+  (a MiKTeX installed by the user in `~/.miktex`). If it has
+  `[Core]SharedSetup=1`, or `LastAdminMaintenance` without `SharedSetup`,
+  the engine behaves as a shared installation. The environment cannot
+  prevent this; a host can detect the file and warn;
+- per-user configuration files of the scripts, first of all latexmk's
+  `~/.latexmkrc` and `~/.config/latexmk/latexmkrc` (they can, for example,
+  set the TeX command latexmk runs); a host that wants its own settings
+  runs `latexmk -norc -r <its file>`;
 - fonts: the system font directories, `~/Library/Fonts`, `~/.fonts`;
 - the engine is built with the link directory `/var/empty/miktex-links`,
   which can never exist: it never looks for programs in `~/bin`, and never
@@ -146,17 +166,23 @@ in `<engine>/bin` work; format files are made on first use.
 ## Code signing
 
 - The engine is ad-hoc signed. A host that is signed with a Developer ID
-  signs every Mach-O file of the engine again (`codesign -f -s <identity>`).
-- With hardened runtime (`-o runtime`), library validation rejects
-  libraries without the host's Team ID; sign all of them with the same
-  identity, or add the entitlement
-  `com.apple.security.cs.disable-library-validation`.
+  and notarized signs every Mach-O file of the engine again, with hardened
+  runtime (`codesign -f -o runtime -s <identity>`): notarization requires
+  hardened runtime on every executable.
+- Every engine program runs as its own process with its own entitlements;
+  the host application's entitlements do not apply to it. Entitlements an
+  engine program needs go onto that program when it is signed.
+- Under hardened runtime, library validation rejects libraries without the
+  same Team ID: sign the libraries in `lib/` with the same identity.
 - Known exceptions under hardened runtime:
-  - `dvisvgm` loads the system Ghostscript library (`libgs`) at run time
-    for PostScript and PDF input; library validation rejects it;
-  - Lua C modules (binary modules loaded by LuaTeX with `require`) need
-    `dlopen` of unsigned code;
-  - luaffi (`ffi` in LuaTeX) needs executable memory
+  - `bin/miktex-dvisvgm` loads the Ghostscript library (`libgs`) the user
+    installed, at run time, for PostScript and PDF input; library
+    validation rejects it unless that program has
+    `com.apple.security.cs.disable-library-validation`;
+  - `bin/miktex-luatex` and `bin/miktex-luahbtex` (and the commands that
+    link to them: `lualatex`, `texlua`, ...): Lua C modules (binary modules
+    loaded with `require`) need `dlopen` of code with another Team ID
+    (`disable-library-validation`); luaffi (`ffi`) needs executable memory
     (`com.apple.security.cs.allow-unsigned-executable-memory`);
   - `lib/libcrypto.3.dylib` and `lib/libcrypto.4.dylib` read
     `openssl.cnf` from `/opt/homebrew/etc/openssl@3` and

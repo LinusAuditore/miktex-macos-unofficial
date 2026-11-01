@@ -152,6 +152,8 @@ jobs:
           cp macos-port/engine/INTEGRATION.md "$out/miktex/"
           bash macos-port/engine/verify-engine.sh "$out/miktex" "$MACOS_MIN_VERSION" "$out/minos.tsv"
           git fetch --no-tags --quiet https://github.com/MiKTeX/miktex.git next
+          # its own assignment: a failure must stop the step
+          upstream=$(git merge-base HEAD FETCH_HEAD)
           python3 -I macos-port/engine/make-manifest.py \
             --engine "$out/miktex" \
             --closure "$out/closure.tsv" \
@@ -161,7 +163,7 @@ jobs:
             --max-min-version "$MACOS_MIN_VERSION" \
             --tag "$([ "$GITHUB_REF_TYPE" = tag ] && echo "$GITHUB_REF_NAME")" \
             --fork-commit "$GITHUB_SHA" \
-            --upstream-commit "$(git merge-base HEAD FETCH_HEAD)" \
+            --upstream-commit "$upstream" \
             --build "runner_image=${ImageOS:-}-${ImageVersion:-}" \
             --build "macos=$(sw_vers -productVersion)" \
             --build "xcode=$(xcodebuild -version | head -1)" \

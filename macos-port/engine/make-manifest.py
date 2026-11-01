@@ -3,8 +3,8 @@
 # (fork CI only).
 #
 # usage: make-manifest.py --engine DIR --closure TSV --links TSV --minos TSV
-#          --miktex-version V --max-min-version V [--tag T]
-#          [--fork-commit C] [--upstream-commit C] [--build KEY=VALUE ...]
+#          --miktex-version V --max-min-version V --fork-commit C
+#          --upstream-commit C [--tag T] [--build KEY=VALUE ...] --output FILE
 #
 # TSV inputs: --closure from package-engine.sh, --links from make-links.sh,
 # --minos from verify-engine.sh. The manifest records what is in the
@@ -53,12 +53,15 @@ def main():
     p.add_argument("--miktex-version", required=True)
     p.add_argument("--max-min-version", required=True)
     p.add_argument("--tag")
-    p.add_argument("--fork-commit")
-    p.add_argument("--upstream-commit")
+    p.add_argument("--fork-commit", required=True)
+    p.add_argument("--upstream-commit", required=True)
     p.add_argument("--build", action="append", default=[], metavar="KEY=VALUE")
     p.add_argument("--output", required=True)
     args = p.parse_args()
     engine = os.path.realpath(args.engine)
+    for name, value in (("--fork-commit", args.fork_commit), ("--upstream-commit", args.upstream_commit)):
+        if not re.fullmatch(r"[0-9a-f]{40}", value):
+            sys.exit(f"make-manifest.py: {name} must be a full commit hash: {value!r}")
 
     minos = read_tsv(args.minos, 2)
     if not minos:
@@ -115,8 +118,8 @@ def main():
         "miktex": {"version": args.miktex_version},
         "source": {
             "repository": "LinusAuditore/miktex-macos-unofficial",
-            "fork_commit": args.fork_commit or None,
-            "upstream_commit": args.upstream_commit or None,
+            "fork_commit": args.fork_commit,
+            "upstream_commit": args.upstream_commit,
         },
         "macos": {
             "arch": "arm64",

@@ -6,11 +6,14 @@ on:
     # an unofficial release: <MiKTeX version>-unofficial.<n>, e.g.
     # 26.5-unofficial.1
     tags: ['*-unofficial.*']
-    # the fork's documents do not need a build (tag pushes ignore this;
-    # COPYING.md is part of the dmg, so not all .md files are listed)
+    # the fork's documents and the engine package (its own workflow) do not
+    # need a dmg build (tag pushes ignore this; COPYING.md is part of the
+    # dmg, so not all .md files are listed)
     paths-ignore:
       - .github/README.md
       - macos-port/release-notes.md
+      - macos-port/engine/**
+      - .github/workflows/macos-arm64-engine.yml
   workflow_dispatch:
 
 permissions:

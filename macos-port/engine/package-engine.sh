@@ -219,8 +219,20 @@ while IFS= read -r f; do
   keep=0
   while IFS= read -r rp; do
     case "$rp" in
-      @loader_path* | @executable_path*)
-        keep=$((keep + 1))
+      @loader_path*)
+        # a copied library can carry a relative rpath into another keg
+        # (e.g. @loader_path/../../../../opt/x/lib); keep only those that
+        # lead into the package
+        real=$(realpath "$(dirname "$f")${rp#@loader_path}" 2>/dev/null || true)
+        case "$real" in
+          "$engine" | "$engine"/*)
+            keep=$((keep + 1))
+            ;;
+          *)
+            echo "- rpath $rp: ${f#"$engine"/}"
+            args+=(-delete_rpath "$rp")
+            ;;
+        esac
         ;;
       *)
         echo "- rpath $rp: ${f#"$engine"/}"

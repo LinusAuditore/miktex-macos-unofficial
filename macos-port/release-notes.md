@@ -90,10 +90,12 @@ still run TeX Live. To use MiKTeX's commands, put `~/bin` before
   natively on Apple Silicon, without Rosetta. biber is an essential
   package, so the first check for updates installs it, as on the other
   platforms; otherwise it is installed when biber runs for the first time.
-- **xkeyval** is not installed on the fly: the package index of the MiKTeX
-  repository lists no files for it at the moment. Packages that need it
-  (for example glossaries) fail until you run
-  `miktex packages install xkeyval` once (this installs version 2.9).
+- **xkeyval** and **tabu** are not installed on the fly: the package index
+  of the MiKTeX repository lists no files for them at the moment.
+  Documents that need them (xkeyval is loaded by glossaries, for example)
+  stop with "File `xkeyval.sty' not found" (or `tabu.sty`) until you run
+  `miktex packages install xkeyval` or `miktex packages install tabu`
+  once.
 - **cm-super** is not installed on the fly (as with MiKTeX on other
   platforms). Documents with `\usepackage[T1]{fontenc}` and microtype can
   fail with "auto expansion is only possible with scalable fonts": add

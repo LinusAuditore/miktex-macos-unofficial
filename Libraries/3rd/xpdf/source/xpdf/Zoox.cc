@@ -6,10 +6,6 @@
 
 #include <aconf.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #if defined(MIKTEX_WINDOWS)
 #  define MIKTEX_UTF8_WRAP_ALL 1
 #  include <miktex/utf8wrap.h>
@@ -282,6 +278,8 @@ bool ZxDoc::parse(const char *data, Guint dataLen) {
   parsePtr = data;
   parseEnd = data + dataLen;
   
+  parseSpace();
+  parseBOM();
   parseSpace();
   parseXMLDecl(this);
   parseMisc(this);
@@ -785,6 +783,12 @@ GString *ZxDoc::parseQuotedString() {
     s = new GString();
   }
   return s;
+}
+
+void ZxDoc::parseBOM() {
+  if (match("\xef\xbb\xbf")) {
+    parsePtr += 3;
+  }
 }
 
 void ZxDoc::parseSpace() {

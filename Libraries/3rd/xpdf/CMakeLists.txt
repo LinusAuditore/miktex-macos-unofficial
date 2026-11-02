@@ -150,6 +150,7 @@ list(APPEND xpdf_sources
     source/xpdf/JPXStream.h
     source/xpdf/Lexer.h
     source/xpdf/Link.h
+    source/xpdf/LocalParams.h
     source/xpdf/NameToCharCode.h
     source/xpdf/NameToUnicodeTable.h
     source/xpdf/Object.h

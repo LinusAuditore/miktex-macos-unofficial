@@ -13,7 +13,6 @@ set(project_sources
 	${CMAKE_CURRENT_SOURCE_DIR}/source/src/hb-subset-cff-common.cc
 	${CMAKE_CURRENT_SOURCE_DIR}/source/src/hb-subset-cff1.cc
 	${CMAKE_CURRENT_SOURCE_DIR}/source/src/hb-subset-cff2.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/src/hb-subset-cff2-to-cff1.cc
 	${CMAKE_CURRENT_SOURCE_DIR}/source/src/hb-subset-input.cc
 	${CMAKE_CURRENT_SOURCE_DIR}/source/src/hb-subset-instancer-iup.cc
 	${CMAKE_CURRENT_SOURCE_DIR}/source/src/hb-subset-instancer-solver.cc
@@ -27,6 +26,7 @@ set(project_sources
 	${CMAKE_CURRENT_SOURCE_DIR}/source/src/hb-subset-table-other.cc
 	${CMAKE_CURRENT_SOURCE_DIR}/source/src/hb-subset-table-var.cc
 	${CMAKE_CURRENT_SOURCE_DIR}/source/src/hb-subset.cc
+	${CMAKE_CURRENT_SOURCE_DIR}/source/src/hb-depend.cc
 )
 
 set (project_headers

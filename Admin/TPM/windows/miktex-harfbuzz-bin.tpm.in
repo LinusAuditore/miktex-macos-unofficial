@@ -7,7 +7,7 @@
     <TPM:Copyright owner="Mozilla Foundation" year="2012"/>
     <TPM:Copyright owner="Google, Inc." year="2020"/>
     <TPM:License type="mit"/>
-    <TPM:Version>14.2.0</TPM:Version>
+    <TPM:Version>15.0.0</TPM:Version>
     <TPM:TargetSystem minVersion="@MIKTEX_MIN_TARGET_SYSTEM_VERSION@">@MIKTEX_TARGET_SYSTEM_TAG@</TPM:TargetSystem>
     <TPM:Date>@MIKTEX_DATETIME_STR@</TPM:Date>
     <TPM:Description>

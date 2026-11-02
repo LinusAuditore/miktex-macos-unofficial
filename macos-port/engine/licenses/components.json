@@ -2419,16 +2419,16 @@
     },
     {
       "id": "harfbuzz",
-      "name": "HarfBuzz 14.2.0 (bundled)",
+      "name": "HarfBuzz 15.0.0 (bundled)",
       "kind": "bundled-library",
       "in_package": true,
       "sources": [
         "Libraries/3rd/harfbuzz/source/src/"
       ],
       "package_files": [
-        "lib/libmiktex-harfbuzz.4.5.0.dylib"
+        "lib/libmiktex-harfbuzz.4.6.0.dylib"
       ],
-      "spdx": "MIT-Modern-Variant AND MIT AND ISC AND LicenseRef-PublicDomain AND Unicode-3.0",
+      "spdx": "MIT-Modern-Variant AND MIT AND ISC AND Unicode-3.0",
       "spdx_sbom": "",
       "texts": [
         {
@@ -2440,22 +2440,15 @@
         },
         {
           "file": "Libraries/3rd/harfbuzz/source/src/hb-algs.hh",
-          "lines": "408-431",
+          "lines": "421-444",
           "sha256": "12dffc8d88e81ef2fda9bb2142599751cced9564ec87cea683538980b1c42d75",
           "what": "MIT notice for fasthash (Zilong Tan)",
           "url": ""
         },
         {
-          "file": "Libraries/3rd/harfbuzz/source/src/hb-algs.hh",
-          "lines": "1308-1312",
-          "sha256": "307bd76ec2e60174ceab98b97c892c00a580250f40039a1be60650b47dd62e35",
-          "what": "Public-domain sort_r (Isaac Turner)",
-          "url": ""
-        },
-        {
           "file": "Libraries/3rd/harfbuzz/source/src/hb-unicode-emoji-table.hh",
           "lines": "3-13",
-          "sha256": "9b5f375030fd29f11045e9b422c619e8bb679791b559eb9a0ee1176e4893cf5d",
+          "sha256": "0d459b9613074e56a0b3800f15104b179fc0978026d3064145c2379228817cac",
           "what": "Unicode emoji-data.txt header: Unicode copyright and terms-of-use pointer",
           "url": ""
         },
@@ -2471,7 +2464,7 @@
         "Unicode-3.0"
       ],
       "corresponding_source": "none",
-      "notes": "19 compile entries (the harfbuzz.cc amalgamation, hb-subset* and graph/), all in libmiktex-harfbuzz.4.5.0.dylib. miktex-xetex and miktex-hitex load it; its headers are compiled into miktex-luahbtex. Correction applied: LicenseRef-PublicDomain is added for the Isaac Turner sort_r code (hb-algs.hh 1308-1312). I also adopted the verifier's optional Unicode-3.0: harfbuzz.cc includes hb-unicode.cc, which includes hb-unicode-emoji-table.hh. That table is generated from Unicode's emoji-data.txt, whose header points to the Unicode terms of use. The full Unicode-3.0 text is a generic text. The fasthash MIT range is extended to 408-431 so that the closing comment line is included. COPYING ('Old MIT') is the SPDX MIT-Modern-Variant text. Added after review: hb-ucd.cc (included by the harfbuzz.cc amalgamation) carries an ISC notice (Grigori Goronzy, lines 2-14); the slice is the complete ISC text, so ISC is in the expression and no generic text is needed."
+      "notes": "19 compile entries (the harfbuzz.cc amalgamation, hb-subset* and graph/), all in libmiktex-harfbuzz.4.5.0.dylib. miktex-xetex and miktex-hitex load it; its headers are compiled into miktex-luahbtex. Correction applied: LicenseRef-PublicDomain is added for the Isaac Turner sort_r code (hb-algs.hh 1308-1312). I also adopted the verifier's optional Unicode-3.0: harfbuzz.cc includes hb-unicode.cc, which includes hb-unicode-emoji-table.hh. That table is generated from Unicode's emoji-data.txt, whose header points to the Unicode terms of use. The full Unicode-3.0 text is a generic text. The fasthash MIT range is extended to 408-431 so that the closing comment line is included. COPYING ('Old MIT') is the SPDX MIT-Modern-Variant text. Added after review: hb-ucd.cc (included by the harfbuzz.cc amalgamation) carries an ISC notice (Grigori Goronzy, lines 2-14); the slice is the complete ISC text, so ISC is in the expression and no generic text is needed. Update 2026-11-02 (HarfBuzz 15.0.0, TL sync): the library is now libmiktex-harfbuzz.4.6.0.dylib, still 19 compile entries (hb-depend.cc added, hb-subset-cff2-to-cff1.cc removed upstream). The Isaac Turner sort_r code is gone from hb-algs.hh (replaced by HarfBuzz's own hb_qsort), so its text and LicenseRef-PublicDomain are removed. The fasthash MIT notice moved unchanged to hb-algs.hh 421-444. The emoji table header (lines 3-13) now cites emoji-data.txt of 2026 (Unicode 18.0); same terms-of-use pointer, new sha256. A scan of the 15.0.0 tree for license phrases found no other license type: the eight new files carry HarfBuzz's Old MIT notice."
     },
     {
       "id": "hitex",
@@ -5085,7 +5078,7 @@
     },
     {
       "id": "pplib",
-      "name": "pplib 2.05.0 (PDF parser used by LuaTeX/XeTeX)",
+      "name": "pplib 2.2 (PDF parser used by LuaTeX/XeTeX)",
       "kind": "bundled-library",
       "in_package": true,
       "sources": [
@@ -5131,7 +5124,7 @@
       ],
       "generic_texts": [],
       "corresponding_source": "fork",
-      "notes": "D18 research (2026-11-01): no license statement for pplib itself exists anywhere upstream. Sources checked: (a) The repo: Libraries/3rd/pplib has no license file; only util/utilsha.c and util/utilmd5.c carry notices. (b) TeX Live trunk libs/pplib, via the full tree listing of the TeX-Live/texlive-source mirror: no LICENSE or COPYING file. pplib-src/README.md only names the author (Pawel Jackowski), doc/conf.py says 'copyright = 2019, p.jackowski@gust.org.pl', and ChangeLog has no license entry. (c) TeX Live's libs/README names the upstream as https://github.com/contextgarden/pplib (2.05.0). That repo has no license file, its README.md is byte-identical to TeX Live's, and the GitHub API reports no license. (d) LuaMetaTeX's copy (contextgarden/luametatex source/libraries/pplib and libraries/readme.txt): no license. (e) CTAN has no pplib entry (the catalogue returns 404). CTAN's luatex entry says gpl2+, but that is LuaTeX's own license, not a statement by pplib's author. Debian's texlive-bin debian/copyright asserts 'Files: libs/pplib/* License: GPL-2+', but it cites no upstream text, and the same file also labels xpdf GPL-2+ although xpdf is GPL-2 or 3 only, so it does not count as evidence. Hence LicenseRef-pplib-unstated, and nothing was fetched. The BSD-3-Clause part (Gifford SHA-2) and the Zlib part (Aladdin MD5) have full notices in their files. pplib is statically linked into miktex-luatex, miktex-luahbtex, miktex-xetex and runtexlua, so its notices must ship with those four binaries. corresponding_source is set to fork as a conservative choice: the license is unknown, so whether it is copyleft cannot be determined, and the object code sits inside GPL engines whose source the fork offers anyway. Added after review: util/utilcrypt.c line 149 says the AES code is 'excerpted from https://github.com/kokke/tiny-AES128-C' (now kokke/tiny-AES-c, which GitHub reports as Unlicense, text in unlicense.txt, fetched at commit 23856752). Unlicense is in the expression and its text ships."
+      "notes": "D18 research (2026-11-01): no license statement for pplib itself exists anywhere upstream. Sources checked: (a) The repo: Libraries/3rd/pplib has no license file; only util/utilsha.c and util/utilmd5.c carry notices. (b) TeX Live trunk libs/pplib, via the full tree listing of the TeX-Live/texlive-source mirror: no LICENSE or COPYING file. pplib-src/README.md only names the author (Pawel Jackowski), doc/conf.py says 'copyright = 2019, p.jackowski@gust.org.pl', and ChangeLog has no license entry. (c) TeX Live's libs/README names the upstream as https://github.com/contextgarden/pplib (2.05.0). That repo has no license file, its README.md is byte-identical to TeX Live's, and the GitHub API reports no license. (d) LuaMetaTeX's copy (contextgarden/luametatex source/libraries/pplib and libraries/readme.txt): no license. (e) CTAN has no pplib entry (the catalogue returns 404). CTAN's luatex entry says gpl2+, but that is LuaTeX's own license, not a statement by pplib's author. Debian's texlive-bin debian/copyright asserts 'Files: libs/pplib/* License: GPL-2+', but it cites no upstream text, and the same file also labels xpdf GPL-2+ although xpdf is GPL-2 or 3 only, so it does not count as evidence. Hence LicenseRef-pplib-unstated, and nothing was fetched. The BSD-3-Clause part (Gifford SHA-2) and the Zlib part (Aladdin MD5) have full notices in their files. pplib is statically linked into miktex-luatex, miktex-luahbtex, miktex-xetex and runtexlua, so its notices must ship with those four binaries. corresponding_source is set to fork as a conservative choice: the license is unknown, so whether it is copyleft cannot be determined, and the object code sits inside GPL engines whose source the fork offers anyway. Added after review: util/utilcrypt.c line 149 says the AES code is 'excerpted from https://github.com/kokke/tiny-AES128-C' (now kokke/tiny-AES-c, which GitHub reports as Unlicense, text in unlicense.txt, fetched at commit 23856752). Unlicense is in the expression and its text ships. Update 2026-11-02 (pplib 2.2, TL sync of libs/pplib/pplib-src/src): the notices of utilsha.c, utilmd5.c and utilcrypt.c are unchanged, 21 compile entries as before, and TeX Live's tree still has no license statement for pplib itself."
     },
     {
       "id": "ps2pk",
@@ -6253,7 +6246,7 @@
     },
     {
       "id": "xpdf",
-      "name": "xpdf 4.04 (static, used by pdfTeX and pdftosrc)",
+      "name": "xpdf 4.06 (static, used by pdfTeX and pdftosrc)",
       "kind": "bundled-library",
       "in_package": true,
       "sources": [
@@ -6283,17 +6276,17 @@
           "url": ""
         },
         {
-          "file": "macos-port/engine/licenses/fetched/xpdf--README-4.04.txt",
+          "file": "macos-port/engine/licenses/fetched/xpdf--README-4.06.txt",
           "lines": "30-59",
           "sha256": "279fca7dfeeacc6b9432a3f8239d64b9a91705a6beb4b375f29cfc8a6e3c0803",
-          "what": "xpdf 4.04 README: License & Distribution (GPL v2 or v3, not any later version)",
-          "url": "https://dl.xpdfreader.com/old/xpdf-4.04.tar.gz#xpdf-4.04/README",
-          "archive_sha256": "63ce23fcbf76048f524c40be479ac3840d7a2cbadb6d1e0646ea77926656bade"
+          "what": "xpdf 4.06 README: License & Distribution (GPL v2 or v3, not any later version)",
+          "url": "https://dl.xpdfreader.com/xpdf-4.06.tar.gz#xpdf-4.06/README",
+          "archive_sha256": "1c38f527c46caee0f712386d42a885b96a31ed9ce11904e872559859894d137e"
         }
       ],
       "generic_texts": [],
       "corresponding_source": "fork",
-      "notes": "56 compile entries (xpdf 42, goo 8, fofi 6) go into a static library that is linked into the installed miktex-pdftex and miktex-pdftosrc. The missing statement is resolved: I downloaded xpdf-4.04.tar.gz (https://dl.xpdfreader.com/old/xpdf-4.04.tar.gz, sha256 63ce23fcbf76048f524c40be479ac3840d7a2cbadb6d1e0646ea77926656bade) and extracted xpdf-4.04/README byte for byte. The file is ISO-8859-1 and was kept exactly as published. The version matches the repo (xpdf/config.h has xpdfVersion 4.04), and the tarball's COPYING and COPYING3 are byte-identical to the repo's. README lines 30-59 say GPL version 2 or 3, not any later version."
+      "notes": "56 compile entries (xpdf 42, goo 8, fofi 6) go into a static library that is linked into the installed miktex-pdftex and miktex-pdftosrc. The missing statement is resolved: I downloaded xpdf-4.04.tar.gz (https://dl.xpdfreader.com/old/xpdf-4.04.tar.gz, sha256 63ce23fcbf76048f524c40be479ac3840d7a2cbadb6d1e0646ea77926656bade) and extracted xpdf-4.04/README byte for byte. The file is ISO-8859-1 and was kept exactly as published. The version matches the repo (xpdf/config.h has xpdfVersion 4.04), and the tarball's COPYING and COPYING3 are byte-identical to the repo's. README lines 30-59 say GPL version 2 or 3, not any later version. Update 2026-11-02 (xpdf 4.06, TL sync): README taken byte for byte from xpdf-4.06.tar.gz (https://dl.xpdfreader.com/xpdf-4.06.tar.gz, sha256 1c38f527c46caee0f712386d42a885b96a31ed9ce11904e872559859894d137e); its lines 30-59 are identical to 4.04's, and the tarball's COPYING and COPYING3 are byte-identical to the repo's. Still 56 compile entries; no other license type in the 4.06 tree."
     },
     {
       "id": "xz",

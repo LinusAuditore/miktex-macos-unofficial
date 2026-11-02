@@ -9,6 +9,25 @@ with this build in the fork's
 MiKTeX project. Inside the application it still calls itself MiKTeX
 Console, with MiKTeX's version number.
 
+## Security update (26.5-unofficial.2)
+
+This release updates three libraries that the application builds from its
+own sources to the versions in TeX Live. They are newer than in MiKTeX
+26.5. All users of 26.5-unofficial.1 should update (see
+[Updating](#updating)).
+
+- **pplib 2.2**, including TeX Live r80628: a crafted encrypted PDF could
+  overflow pplib's key buffers when it was included with lualatex or
+  xelatex.
+- **xpdf 4.06**, which pdfTeX uses to include PDF files: fixes the
+  published CVEs listed in xpdf's CHANGES for 4.05 and 4.06 (for example
+  CVE-2024-2971, CVE-2024-3247 and CVE-2025-2574).
+- **HarfBuzz 15.0.0**: robustness and memory-safety fixes for malformed
+  fonts (upstream NEWS, 14.2.1 to 15.0.0).
+
+Nothing else changed. Documents typeset the same way as with
+26.5-unofficial.1.
+
 ## Requirements
 
 - A Mac with Apple Silicon
@@ -40,6 +59,19 @@ name and the same data directory.
    `~/.bash_profile`, if it exists). Open a new Terminal window to use them.
 4. Missing packages are installed from the MiKTeX package repository when a
    document needs them.
+
+## Updating
+
+To update from an earlier build:
+
+1. Quit MiKTeX Console.
+2. Open the new disk image and drag **MiKTeX Console** to **Applications**,
+   replacing the old one.
+3. Remove the quarantine attribute again (step 2 of
+   [Installation](#installation)).
+
+Your settings, the installed packages and the commands in `~/bin` are
+kept; you do not need to run the setup again.
 
 `~/bin` is appended to `PATH`. If TeX Live or MacTeX is installed, its
 `/Library/TeX/texbin` comes first, so `pdflatex` and friends in Terminal
@@ -103,10 +135,14 @@ differently from upstream MiKTeX in these ways:
   macOS fonts.
 - Python scripts fall back to `python3`.
 - Packages for `darwin-x86_64` (biber) are used on Apple Silicon.
+- pplib, xpdf and HarfBuzz are newer than in MiKTeX 26.5 (synced with
+  TeX Live, see [Security update](#security-update-265-unofficial2)).
 
 ## Third-party components
 
 Besides MiKTeX, the application bundle contains libraries built by
 Homebrew, among them Qt 6, ICU, OpenSSL, curl, Boost, GLib, GMP, MPFR,
-FreeType, HarfBuzz and log4cxx. They are covered by their own licenses; the Homebrew formulae
-name them and link to the sources.
+FreeType and log4cxx, and libraries built from the sources in this
+repository, among them HarfBuzz, cairo, fontconfig, gd, pplib, xpdf and
+poppler. They are covered by their own licenses; the Homebrew formulae and
+the sources in this repository name them.

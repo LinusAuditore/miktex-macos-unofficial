@@ -117,6 +117,13 @@ still run TeX Live. To use MiKTeX's commands, put `~/bin` before
   stop with "File `xkeyval.sty' not found" (or `tabu.sty`) until you run
   `miktex packages install xkeyval` or `miktex packages install tabu`
   once.
+- **Packages that the repository added after this build** are not found
+  until MiKTeX has checked for updates once: a new installation starts
+  with the package list of the build. For example, since nameref became a
+  package of its own (November 2026), documents that load hyperref stop
+  with "File `nameref.sty' not found" when the package list is older.
+  Check for updates once (MiKTeX Console > Updates, or
+  `miktex packages check-update` in Terminal) and typeset again.
 - **cm-super** is not installed on the fly (as with MiKTeX on other
   platforms). Documents with `\usepackage[T1]{fontenc}` and microtype can
   fail with "auto expansion is only possible with scalable fonts": add

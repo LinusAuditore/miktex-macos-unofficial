@@ -9,6 +9,27 @@ with this build in the fork's
 MiKTeX project. Inside the application it still calls itself MiKTeX
 Console, with MiKTeX's version number.
 
+## Changes in 26.5-unofficial.3
+
+This release brings in the changes that MiKTeX made after 26.5 (MiKTeX's
+development branch `next`, as of 2026-11-19). They are not yet part of a
+MiKTeX release.
+
+- **XeTeX and dvipdfmx** (TeX Live sync): a malformed BMP image could crash
+  xelatex; such images are now rejected with a warning.
+- **LuaTeX 1.27.11** (TeX Live sync): fixes for malformed fonts and virtual
+  fonts, among others. The format files of lualatex change; they are made
+  again automatically the first time lualatex runs after the update, which
+  takes a little longer once.
+- **pdfTeX** (TeX Live sync): faster inclusion of PDF and JPEG files.
+- **minted** version 3 works without `--shell-escape`: its helper
+  `latexminted` may now run in restricted mode, as in TeX Live. It needs
+  `python3` (see [Known limitations](#known-limitations)).
+- MiKTeX fixes: a deadlock of the file system watcher
+  ([#1780](https://github.com/MiKTeX/miktex/issues/1780)), and a stale
+  lock file no longer keeps MiKTeX Console from starting
+  ([#372](https://github.com/MiKTeX/miktex/issues/372)).
+
 ## Security update (26.5-unofficial.2)
 
 This release updates three libraries that the application builds from its
@@ -139,6 +160,8 @@ differently from upstream MiKTeX in these ways:
 - Packages for `darwin-x86_64` (biber) are used on Apple Silicon.
 - pplib, xpdf and HarfBuzz are newer than in MiKTeX 26.5 (synced with
   TeX Live, see [Security update](#security-update-265-unofficial2)).
+- It includes MiKTeX changes that are not yet released (see
+  [Changes in 26.5-unofficial.3](#changes-in-265-unofficial3)).
 
 ## Third-party components
 

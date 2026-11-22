@@ -311,12 +311,11 @@ jobs:
           cd dist
           sha256sum -c SHA256SUMS
           {
-            echo "The command-line MiKTeX engine for applications that embed it (MarchTeX)."
-            echo "**Not for end users**: to install MiKTeX, use the dmg of the latest release."
+            # one line per paragraph and list item: no hard wraps in release notes
+            echo "The command-line MiKTeX engine for applications that embed it (MarchTeX). **Not for end users**: to install MiKTeX, use the dmg of the latest release."
             echo
             echo "- arm64 only, macOS $(python3 -c 'import json; print(json.load(open("engine-manifest.json"))["macos"]["min_version"])') or later; no Qt, no user interface"
-            echo "- relocatable; ad-hoc signed; see INTEGRATION.md in the archive:"
-            echo "  $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/$GITHUB_SHA/macos-port/engine/INTEGRATION.md"
+            echo "- relocatable; ad-hoc signed; see INTEGRATION.md in the archive: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/$GITHUB_SHA/macos-port/engine/INTEGRATION.md"
             echo "- engine-manifest.json describes the contents; licenses/ in the archive has the license texts"
             echo "- source-*: the corresponding sources of the copyleft components that are not built from this repository's sources (Homebrew libraries with their formula files, upstream programs); the others are in this tag's source archive"
             echo

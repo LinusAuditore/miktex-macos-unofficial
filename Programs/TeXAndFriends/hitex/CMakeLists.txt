@@ -1,6 +1,6 @@
 ## CMakeLists.txt
 ##
-## Copyright (C) 2022-2025 Christian Schenk
+## Copyright (C) 2022-2026 Christian Schenk
 ## 
 ## This file is free software; the copyright holder gives
 ## unlimited permission to copy and/or distribute it, with or
@@ -129,7 +129,7 @@ target_link_libraries(${MIKTEX_PREFIX}hitex
 )
 
 if(USE_SYSTEM_HARFBUZZ)
-    target_link_libraries(${MIKTEX_PREFIX}hitex MiKTeX::Imported::HARFBUZZ)
+    target_link_libraries(${MIKTEX_PREFIX}hitex MiKTeX::Imported::HARFBUZZ MiKTeX::Imported::HARFBUZZ_SUBSET)
 else()
     target_link_libraries(${MIKTEX_PREFIX}hitex ${harfbuzz_dll_name})
 endif()

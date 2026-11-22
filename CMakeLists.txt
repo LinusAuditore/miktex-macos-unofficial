@@ -332,13 +332,25 @@ option(
 if(MIKTEX_HOMEBREW OR MIKTEX_MACOS_BUNDLE)
     set(use_system_harfbuzz_icu_default FALSE)
 elseif(MIKTEX_UNIX_ALIKE)
-set(use_system_harfbuzz_icu_default TRUE)
+    set(use_system_harfbuzz_icu_default TRUE)
 endif()
 
 option(
     USE_SYSTEM_HARFBUZZ_ICU
     "Use the system Harfbuzz (ICU) text shaping library."
     ${use_system_harfbuzz_icu_default}
+)
+
+if(MIKTEX_HOMEBREW OR MIKTEX_MACOS_BUNDLE)
+    set(use_system_harfbuzz_subset_default FALSE)
+elseif(MIKTEX_UNIX_ALIKE)
+    set(use_system_harfbuzz_subset_default TRUE)
+endif()
+
+option(
+    USE_SYSTEM_HARFBUZZ_SUBSET
+    "Use the system Harfbuzz (SUBSET) text shaping library."
+    ${use_system_harfbuzz_subset_default}
 )
 
 option(
@@ -926,6 +938,7 @@ include(CheckVariableExists)
 include(ConfigNames)
 include(CreateDllWrapper)
 include(CreateWebApp)
+include(DefaultCharTypeIsSigned)
 include(DefaultCharTypeIsUnsigned)
 include(DelayLoad)
 include(ExecutableNames)
@@ -1224,6 +1237,10 @@ endif()
 
 if(USE_SYSTEM_HARFBUZZ_ICU)
     find_package(HARFBUZZ_ICU REQUIRED)
+endif()
+
+if(USE_SYSTEM_HARFBUZZ_SUBSET)
+    find_package(HARFBUZZ_SUBSET REQUIRED)
 endif()
 
 if(USE_SYSTEM_HUNSPELL)
@@ -1905,14 +1922,11 @@ if(USE_SYSTEM_HARFBUZZ)
         IMPORTED_LOCATION "${HARFBUZZ_LIBRARY}"
         INTERFACE_INCLUDE_DIRECTORIES "${HARFBUZZ_INCLUDE_DIRS}"
     )
-    # the hb-subset API ships as a separate library in some harfbuzz
-    # distributions (e.g. Homebrew)
-    find_library(HARFBUZZ_SUBSET_LIBRARY NAMES harfbuzz-subset)
-    if(HARFBUZZ_SUBSET_LIBRARY)
-        set_property(TARGET MiKTeX::Imported::HARFBUZZ APPEND PROPERTY
-            INTERFACE_LINK_LIBRARIES "${HARFBUZZ_SUBSET_LIBRARY}"
-        )
-    endif()
+    add_library(MiKTeX::Imported::HARFBUZZ_SUBSET UNKNOWN IMPORTED)
+    set_target_properties(MiKTeX::Imported::HARFBUZZ_SUBSET
+        PROPERTIES
+        IMPORTED_LOCATION "${HARFBUZZ_SUBSET_LIBRARY}"
+    )
 else()
     add_subdirectory(${MIKTEX_REL_HARFBUZZ_DIR})
 endif()

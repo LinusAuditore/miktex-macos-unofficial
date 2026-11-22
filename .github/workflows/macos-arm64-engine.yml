@@ -83,6 +83,7 @@ jobs:
             -DUSE_SYSTEM_GD=FALSE \
             -DUSE_SYSTEM_HARFBUZZ=FALSE \
             -DUSE_SYSTEM_HARFBUZZ_ICU=FALSE \
+            -DUSE_SYSTEM_HARFBUZZ_SUBSET=FALSE \
             -DUSE_SYSTEM_MSPACK=FALSE \
             -DWITH_MAN_PAGES=FALSE \
             -DMIKTEX_USER_LINK_TARGET_DIR=/var/empty/miktex-links \

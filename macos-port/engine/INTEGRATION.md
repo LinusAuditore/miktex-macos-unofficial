@@ -169,6 +169,14 @@ in `<engine>/bin` work; format files are made on first use.
   succeeds (exit code 0) and the other steps run.
 - An update deletes the format files; they are made again on their next
   use, so the first typesetting run after an update takes longer.
+- The package database that on-the-fly installation uses is the one of the
+  last `packages check-update` (or `update-package-database`); before the
+  first one, it is the snapshot the engine was built with. Run
+  `packages check-update` regularly, and again when the first-time setup
+  ran offline: with an old database, packages that the repository added
+  or split off later are not found. For example, since nameref became a
+  package of its own (November 2026), every document that loads hyperref
+  stops with "File `nameref.sty' not found" when the database is older.
 - The commands in `bin/` are fixed when the package is made. A command that
   a later package update adds (a new script or format) has no link in
   `bin/` until a new engine package is released.
